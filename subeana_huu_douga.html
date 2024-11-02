@@ -33,7 +33,7 @@ height="1080"
         <button type="button" id="forward_btn" onclick="forward()">10送り</button>
     </div>
     <label id="time"></label>
-    <input id="audio-file" type="file" accept=".mp3,.m4a,.aac,.wav,.flac,.ogg">
+    <input id="audio-file" type="file" accept=".mp3,.m4a,.aac,.wav,.flac,.ogg" size="2px">
     <button type="button" id="fullscreen" onclick="fullscreen()">全画面表示</button>
 </div>
 </div>
@@ -216,7 +216,7 @@ height="1080"
 
 <div class="scroll" id="scroll">
     <nobr>
-    歌詞 秒数 速度
+    <label>エディター</label>
     <button id="save-button" onclick="save();">保存</button>
     <label id="load-label" class="load-label">
     <input id="load-file" type="file" accept=".txt" style="display:none;" onchange="load()"/>読み込み</label>
@@ -228,6 +228,7 @@ height="1080"
 
 
     <p></p>
+    <p>歌詞 秒数 速度</p>
 
     <div class="input-form" id="input-form">
 
