@@ -8,7 +8,7 @@
 
 <p id="midasi">
     <img src="icon.png" width="35px" style="vertical-align: bottom;"></img>
-    <labal><font size="5.5px">全てあなたのメーカーです。/全てあなたの所為です。風動画メーカー</font></labal>
+    <labal><font size="5.5px">全てあなたのメーカーです。(beta)/全てあなたの所為です。風動画メーカー</font></labal>
 </p>
 
 <div id="container">
@@ -169,6 +169,13 @@ height="1080"
     }
 
     function record(){
+
+        let label_element = document.getElementById('download_label').textContent;
+        document.getElementById('download_label').textContent = 'ダウンロード中';
+
+        const player_element = document.querySelector("#player");
+        player_element.inert = true;
+
         console.log( audio.duration * 1000 );
         audio.currentTime = 0;
         play();
@@ -201,6 +208,8 @@ height="1080"
         // 15秒後に録音終了しておきますね
         setTimeout(() => {
             recorder.stop();
+            document.getElementById('download_label').textContent = '完了';
+            player_element.inert = false;
         }, audio.duration * 1000);
     }
 </script>
@@ -295,7 +304,7 @@ height="1080"
 </div>
 </div>
 <p>※全画面表示は一部機種では動かない可能性があります。</p>
-<button id="record" class="record" onclick="record()">動画として保存する</button>
+<button id="record" class="record" onclick="record()">動画として保存する</button><label id="download_label"></label>
 <br>
 
 <div style="text-align: center;">
