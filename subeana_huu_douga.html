@@ -1,0 +1,313 @@
+<html lang="ja">
+
+<link rel="stylesheet" href="subeana_huu_douga.css">
+<title>全てあなたのメーカーです。</title>
+<link rel="icon" href="favicon.ico">
+<meta name="viewport" content="width=device-width,initial-scale=1"/>
+
+
+<p id="midasi">
+    <img src="icon.png" width="35px" style="vertical-align: bottom;"></img>
+    <labal><font size="5.5px">全てあなたのメーカーです。/全てあなたの所為です。風動画メーカー</font></labal>
+</p>
+
+<div id="container">
+
+<div id="saisei">
+
+<canvas id="douga_gamen"
+width="1920"
+height="1080"
+>
+</canvas>
+
+<div id="player">
+    <button type="button" id="play_btn" onclick="play()">再生</button>
+    <button type="button" id="stop_btn" onclick="stop()">停止</button>
+    <button type="button" id="begin_btn" onclick="begin()">最初から</button>
+    <div id=backforward>
+        <div id="seekbar">
+        <input type="current" id="current"></input>
+        </div>
+        <button type="button" id="back_btn" onclick="back()">10戻し</button>
+        <button type="button" id="forward_btn" onclick="forward()">10送り</button>
+    </div>
+    <label id="time"></label>
+    <input id="audio-file" type="file" accept=".mp3,.m4a,.aac,.wav,.flac,.ogg">
+    <button type="button" id="fullscreen" onclick="fullscreen()">全画面表示</button>
+</div>
+</div>
+
+<script>
+    var audio;
+    audio = new Audio();
+    window.addEventListener("load", () =>{
+        const f = document.getElementById("audio-file");
+        f.addEventListener("change", evt => {
+            let input = evt.target;
+            if(input.files.length ==0) {
+                return;
+            }
+
+            const file = input.files[0];
+            if (!file.type.match("audio.*")) {
+                alert("音声ファイルを選択してください");
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = () => {
+                audio.pause();
+                audio.src = reader.result;
+            };
+            reader.readAsDataURL(file);
+        });
+    });
+
+    let timeratio = 0;
+    const canvas = document.querySelector("canvas");
+    const ctx = canvas.getContext("2d")
+    ctx.textAlign = "center";
+
+    const current = document.getElementById('current');
+
+    ctx.fillStyle = "black";
+    ctx.fillRect(0, 0, 1920, 1080);
+    ctx.fillStyle = "white";
+    ctx.font = "80px GenZenGothic";
+    window.addEventListener("load", () => {
+        ctx.fillText("全てあなたのメーカーです。", 960, 540);
+    });
+
+    function play() {
+
+        const formInfos = [];
+        {
+            const forms = document.querySelectorAll(".input-form > form");
+            for (form of forms) {
+                const formInfo = {
+                    kasi: form.querySelector(".kasi").value,
+                    byou: form.querySelector(".byou").value,
+                    sokudo: form.querySelector(".sokudo").value,
+                };
+                formInfos.push(formInfo);
+            }
+        }
+
+        let size_element = document.getElementById('size');
+        console.log(size_element.value);
+        ctx.font = size_element.value + "px GenZenGothic";
+
+        let background_element = document.getElementById('background');
+        console.log(background_element.value);
+        ctx.font = background_element.value + "px GenZenGothic";
+        let backgroundcolor = background_element.value
+
+        console.log(formInfos[0].byou);
+        console.log(formInfos.length);
+        draw(formInfos, backgroundcolor);
+        audio.play();
+        console.log(audio.duration);
+    }
+    
+    function stop() {
+        cancelAnimationFrame(gamen)
+        audio.pause();
+    }
+
+    function begin() {
+        audio.currentTime = 0;
+    }
+
+    function back() {
+        audio.currentTime -= 10;
+    }
+
+    function forward() {
+        audio.currentTime += 10;
+    }
+
+    function fullscreen() {
+        console.log("start fullscreen")
+        const elem = document.getElementById("saisei");
+
+        if (!document.fullscreenElement) {
+            elem.requestFullscreen();
+            const canvas_full = document.getElementById("douga_gamen");
+            canvas_full.style.width = "90%";
+            canvas_full.style.height = "90%";
+        } else {
+            document.exitFullscreen();
+            const canvas_full = document.getElementById("douga_gamen");
+            canvas_full.style.width = "640px";
+            canvas_full.style.height = "360px";
+        }
+    }
+
+    let gamen;
+    function draw(formInfos, backgroundcolor){
+
+        document.getElementById("time").textContent = Math.round(audio.currentTime*10)/10;
+
+        //console.log(audio.currentTime)
+        timeRatio = (audio.currentTime/audio.duration)*100;
+        //console.log(timeRatio+'%');
+        current.style.width = timeRatio+'%';
+
+        ctx.fillStyle = backgroundcolor;
+
+        console.log(backgroundcolor);
+        ctx.fillRect(0, 0, 1920, 1080);
+
+        ctx.fillStyle = "white";
+
+        for (let i = 0; i < formInfos.length; i++) {
+            ctx.fillText(formInfos[i].kasi, 960, 1080 - (audio.currentTime - formInfos[i].byou) * formInfos[i].sokudo);
+        }
+        
+        gamen = window.requestAnimationFrame(function() { draw(formInfos, backgroundcolor); });//1秒に60回
+    }
+
+    function record(){
+        console.log( audio.duration * 1000 );
+        audio.currentTime = 0;
+        play();
+
+        const canvasStream = document.querySelector('canvas').captureStream(120);
+        const recorder = new MediaRecorder(canvasStream, { mimeType: "video/mp4" });
+
+        // 定期的に録画データが飛んでくるので貯めます
+        let chunks = [];
+        recorder.addEventListener('dataavailable', (e) => {
+            chunks.push(e.data);
+        });
+
+        // 録画終了時の処理
+        recorder.addEventListener('stop', () => {
+            // 貯めていたデータをまるっとひとかたまりに
+            const blob = new Blob(chunks, {type: 'video/mp4'});
+
+            const a = document.createElement('a');
+            a.href =  URL.createObjectURL(blob);
+            a.download = 'sample.mp4';
+            a.click();
+        });
+
+        // 録画の開始
+        // 今回は5秒に1回、データを出力するようにします
+        // （＝5秒に1回、dataavailableが呼ばれます）
+        recorder.start(1);
+
+        // 15秒後に録音終了しておきますね
+        setTimeout(() => {
+            recorder.stop();
+        }, audio.duration * 1000);
+    }
+</script>
+
+<div class="scroll" id="scroll">
+    <nobr>
+    歌詞 秒数 速度
+    <button id="save-button" onclick="save();">保存</button>
+    <label id="load-label" class="load-label">
+    <input id="load-file" type="file" accept=".txt" style="display:none;" onchange="load()"/>読み込み</label>
+    </nobr>
+    <p>
+        <label>文字サイズ </label><input type="text" class="size" id="size" size="2px" value="80"></input><label>px</label>
+        <label>背景の色 </label><input type="color" id="background" class="background" value="#000000"></input>
+    </p>
+
+
+    <p></p>
+
+    <div class="input-form" id="input-form">
+
+    </div>
+
+    <script>
+
+    document.getElementById("load-label").addEventListener("change", function(e){
+     e.target.nextSibling.nodeValue = e.target.files.length ? e.target.files[0].name : "load";
+    });
+
+    let i = 1;
+    function addForm(kasi = "", byou = "", sokudo = "") {
+        const form = document.createElement("form");
+        //form.id = "kasi+byou";
+        form.innerHTML = `
+            <input type="text" class="kasi" id="kasi" size="20px"></input>
+            <input type="text" class="byou" id="byou" size="1px" pattern="[0-9]"></input>
+            <input type="text" class="sokudo" id="sokudo" size="1px" pattern="[0-9]"></input>
+            <button type="button" class="btn-remove" onclick="deleteForm(this)">-</button>
+        `;
+        const inputs = form.querySelectorAll("input");
+        inputs[0].value = kasi;
+        inputs[1].value = byou;
+        inputs[2].value = sokudo;
+        const parent = document.getElementById("input-form");
+        parent.appendChild(form);
+    }
+    addEventListener("load", () => addForm());
+
+    function deleteForm(btn) {
+        btn.parentNode.parentNode.removeChild(btn.parentNode);
+        i--;
+        console.log(i);
+    }
+
+    function save() {
+        const formInfos = [];
+        {
+            const forms = document.querySelectorAll(".input-form > form");
+            for (form of forms) {
+                const formInfo = {
+                    kasi: form.querySelector(".kasi").value,
+                    byou: form.querySelector(".byou").value,
+                    sokudo: form.querySelector(".sokudo").value,
+                    
+                };
+                formInfos.push(formInfo);
+            }
+        }
+
+        const txt = JSON.stringify(formInfos) ;
+
+        const blob = new Blob([txt], { type: 'text/plain' });
+
+        const a = document.createElement('a');
+        a.href =  URL.createObjectURL(blob);
+        a.download = 'sample.txt';
+        a.click();
+    }
+
+    async function load(){
+        const input = document.getElementById("load-file");
+        const text = await input.files[0].text()
+        const json = JSON.parse(text);
+        document.getElementById("input-form").innerHTML = "";
+        for (let i = 0; i < json.length; ++i) {
+            addForm(json[i].kasi, json[i].byou, json[i].sokudo)
+        }
+    }
+    </script>
+
+    <button type="button" class="btn-clone" onclick="addForm()"> + </button>
+</div>
+</div>
+<p>※全画面表示は一部機種では動かない可能性があります。</p>
+<button id="record" class="record" onclick="record()">動画として保存する</button>
+<br>
+
+<div style="text-align: center;">
+
+<p><font size="6px"><span style="border-bottom: solid 5px white;">クレジット</span></font></p>
+
+<p>「源全角ゴシック改」(
+<a href="https://drive.google.com/drive/folders/19WidrJoCmI5qLJV-eR_ydURIwxB2-DSH" style="color: white;">https://drive.google.com/drive/folders/19WidrJoCmI5qLJV-eR_ydURIwxB2-DSH</a>
+)</p>
+
+<p>Licensed under SIL Open Font License 1.1 
+<a href="http://scripts.sil.org/OFL" style="color:rgb(255, 255, 255)">http://scripts.sil.org/OFL</a>
+© 2021 全て語り手の所為です。</p>
+
+</div>
