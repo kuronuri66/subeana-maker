@@ -1,7 +1,11 @@
 # subeana-maker
 
 クレジット
-原全角ゴシック
+「源全角ゴシック改」( https://drive.google.com/drive/folders/19WidrJoCmI5qLJV-eR_ydURIwxB2-DSH )
+
+Licensed under SIL Open Font License 1.1
+http://scripts.sil.org/OFL
+© 2021 全て語り手の所為です。
 
 1作品目です。
 細かいところはがばいかもしれませんが、
