@@ -4,7 +4,7 @@
 }
 
 body {
-	font-family: GenZenGothic;
+    font-family: GenZenGothic;
     background-color:rgb(25, 25, 25);
     color: white;
 }
@@ -105,6 +105,7 @@ div.scroll {
     background-color: #282828;
     border: 1px solid #ffffff;
     color: #ffffff;
+    border-radius: 1px;
 }
 
 #player #current {
@@ -126,6 +127,7 @@ div.scroll {
     background: black;
     border: 1px solid #ffffff;
     color: white;
+    border-radius: 1px;
 }
 
 #player #audio-file {
